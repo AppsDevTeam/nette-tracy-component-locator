@@ -1,5 +1,7 @@
 <?php
 
+namespace ADT\ComponentLocator;
+
 class ComponentLocator implements Tracy\IBarPanel
 {
 	public function getTab()
