@@ -1,0 +1,15 @@
+{
+	"name": "adt/nette-tracy-component-locator",
+	"type": "library",
+	"homepage": "https://www.appsdevteam.com",
+	"license": ["MIT"],
+	"require": {
+		"php": ">=7.1",
+		"nette/tracy": "^2.4"
+	},
+	"autoload": {
+		"psr-4": {
+			"ADT\\ComponentLoader\\": "src/"
+		}
+	}
+}
