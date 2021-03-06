@@ -2,19 +2,36 @@
 
 namespace ADT\ComponentLocator;
 
+use Nette\Application\UI\Presenter;
+use Nette\Utils\Strings;
+use Tracy;
+
 class ComponentLocator implements Tracy\IBarPanel
 {
-	public function getTab()
+	public static $factories = [];
+
+	public static function initializePanel(Presenter $presenter): void
 	{
-		$classes = [];
-		foreach(get_declared_classes() as $className) {
-			$reflectionClass = new ReflectionClass($className);
-			file_put_contents("aaa", \Tracy\Debugger::$editorMapping);
-			foreach(Tracy\Debugger::$editorMapping as $from => $to) {
-				$classes[$className] = str_replace($from, $to, $reflectionClass->getFileName());
+		foreach (get_class_methods(get_class($presenter)) as $methodName) {
+			if (Strings::startsWith($methodName, 'createComponent')) {
+				$reflection = new \ReflectionMethod($presenter, $methodName);
+
+				$fileName = $reflection->getFileName();
+				foreach (Tracy\Debugger::$editorMapping as $from => $to) {
+					$fileName = str_replace($from, $to, $fileName);
+				}
+
+				self::$factories[] = [
+					'component' => lcfirst(str_replace('createComponent', '', $methodName)),
+					'file' => $fileName,
+					'line' => $reflection->getStartLine()
+				];
 			}
 		}
+	}
 
+	public function getTab()
+	{
 		return '
 		<span title="Najít komponentu" class="js-tracy-component-locator" style="cursor: pointer;">' .
 			'<svg version="1.1" id="Icons" width="16" height="16" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
@@ -44,7 +61,8 @@ class ComponentLocator implements Tracy\IBarPanel
 					return string.charAt(0).toUpperCase() + string.slice(1);
 				}
 				
-				const classes = " . json_encode($classes) . ";
+				const classes = " . json_encode(self::$factories) . ";
+	
 				const findElement = function(e) {
 					e.preventDefault();
 					e.stopPropagation();
@@ -52,16 +70,16 @@ class ComponentLocator implements Tracy\IBarPanel
 					let found = false;
 					$(e.target).parents().each(function () { 
 						if (this.getAttribute('id')) {
-							const id = capitalizeFirstLetter(this.getAttribute('id').replace('frm-', '').replace('snippet-', '').split('-')[0]);
-							for (let key in classes) {
-								const parts = key.split('\\\\');
-		
-								if (parts.length > 0 && parts[parts.length - 1] === id) {
-									found = true;
-									window.location.href = 'phpstorm://open?url=file=' + classes[key] + '&line=1';
-									break;
-								}
-							}
+							const id = this.getAttribute('id').replace('frm-', '').replace('snippet-', '').split('-')[0];
+							try {
+								classes.forEach(function(factory) {
+									if (factory.component === id) {
+										found = true;
+										window.location.href = '" . Tracy\Debugger::$editor . "'.replace('%file', factory.file).replace('%line=', factory.line);
+										throw true;
+									}
+								});
+							} catch (e) {}
 						}
 						
 						if (found) {
