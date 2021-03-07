@@ -9,7 +9,7 @@ use Zend\Code\Reflection\ClassReflection;
 
 class ComponentLocator implements Tracy\IBarPanel
 {
-	public static $factories = [];
+	public static $components = [];
 
 	public static function initializePanel(Presenter $presenter): void
 	{
@@ -21,8 +21,8 @@ class ComponentLocator implements Tracy\IBarPanel
 					$fileName = str_replace($from, $to, $fileName);
 				}
 
-				self::$factories[] = [
-					'component' => lcfirst(str_replace('createComponent', '', $methodReflection->getName())),
+				self::$components[] = [
+					'name' => lcfirst(str_replace('createComponent', '', $methodReflection->getName())),
 					'file' => $fileName,
 					'line' => $reflection->getStartLine()
 				];
@@ -33,7 +33,7 @@ class ComponentLocator implements Tracy\IBarPanel
 	public function getTab()
 	{
 		return '
-		<span title="Najít komponentu" class="js-tracy-component-locator" style="cursor: pointer;">' .
+		<span title="Find a component" class="js-tracy-component-locator" style="cursor: pointer;">' .
 			'<svg version="1.1" id="Icons" width="16" height="16" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
 			 viewBox="0 0 32 32" style="enable-background:new 0 0 32 32;" xml:space="preserve">
 				<style type="text/css">
@@ -50,7 +50,7 @@ class ComponentLocator implements Tracy\IBarPanel
 				<path class="st3" d="M24.3,12c-1.3-0.2-2.3,0.8-2.3,2v-0.9c0-1-0.7-1.9-1.7-2.1c-1.3-0.2-2.3,0.8-2.3,2v-0.9c0-1-0.7-1.9-1.7-2.1
 					c-1.3-0.2-2.3,0.8-2.3,2l0-6.9c0-1-0.7-1.9-1.7-2.1C11.1,2.8,10,3.8,10,5v8.5c0-1.5-1.3-2.6-2.8-2.5c-0.5,0-0.9,0.2-1.2,0.5v7.7
 					c0,5.1,3.9,9.6,9,9.8c0.3,0,0.6,0,0.8,0C21.6,28.8,26,23.9,26,18.1V18l0-3.9C26,13.1,25.3,12.2,24.3,12z"/>
-			</svg>' . " Najít komponentu" .
+			</svg>' . " Find a component" .
 			"</span>" .
 			"<script>
 			$(function () {
@@ -61,7 +61,7 @@ class ComponentLocator implements Tracy\IBarPanel
 					return string.charAt(0).toUpperCase() + string.slice(1);
 				}
 				
-				const classes = " . json_encode(self::$factories) . ";
+				const components = " . json_encode(self::$components) . ";
 
 				const findElement = function(e) {
 					e.preventDefault();
@@ -72,10 +72,11 @@ class ComponentLocator implements Tracy\IBarPanel
 						if (this.getAttribute('id')) {
 							const id = this.getAttribute('id').replace('frm-', '').replace('snippet-', '').split('-')[0];
 							try {
-								classes.forEach(function(factory) {
-									if (factory.component === id) {
+								components.forEach(function(component) {
+									if (component.name === id) {
 										found = true;
-										window.location.href = '" . Tracy\Debugger::$editor . "'.replace('%file', factory.file).replace('%line', factory.line);
+										window.location.href = '" . Tracy\Debugger::$editor . "'.replace('%file', component.file).replace('%line', component.line);
+										throw true;
 									}
 								});
 							} catch (e) {}
