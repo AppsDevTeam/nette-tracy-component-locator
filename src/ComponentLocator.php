@@ -5,6 +5,7 @@ namespace ADT\ComponentLocator;
 use Nette\Application\UI\Presenter;
 use Nette\Utils\Strings;
 use Tracy;
+use Zend\Code\Reflection\ClassReflection;
 
 class ComponentLocator implements Tracy\IBarPanel
 {
@@ -12,17 +13,16 @@ class ComponentLocator implements Tracy\IBarPanel
 
 	public static function initializePanel(Presenter $presenter): void
 	{
-		foreach (get_class_methods(get_class($presenter)) as $methodName) {
-			if (Strings::startsWith($methodName, 'createComponent')) {
-				$reflection = new \ReflectionMethod($presenter, $methodName);
-
+		foreach ((new ClassReflection(get_class($presenter)))->getMethods() as $methodReflection) {
+			if (Strings::startsWith($methodReflection->getName(), 'createComponent')) {
+				$reflection = new \ReflectionMethod($presenter, $methodReflection->getName());
 				$fileName = $reflection->getFileName();
 				foreach (Tracy\Debugger::$editorMapping as $from => $to) {
 					$fileName = str_replace($from, $to, $fileName);
 				}
 
 				self::$factories[] = [
-					'component' => lcfirst(str_replace('createComponent', '', $methodName)),
+					'component' => lcfirst(str_replace('createComponent', '', $methodReflection->getName())),
 					'file' => $fileName,
 					'line' => $reflection->getStartLine()
 				];
@@ -62,7 +62,7 @@ class ComponentLocator implements Tracy\IBarPanel
 				}
 				
 				const classes = " . json_encode(self::$factories) . ";
-	
+
 				const findElement = function(e) {
 					e.preventDefault();
 					e.stopPropagation();
@@ -75,8 +75,7 @@ class ComponentLocator implements Tracy\IBarPanel
 								classes.forEach(function(factory) {
 									if (factory.component === id) {
 										found = true;
-										window.location.href = '" . Tracy\Debugger::$editor . "'.replace('%file', factory.file).replace('%line=', factory.line);
-										throw true;
+										window.location.href = '" . Tracy\Debugger::$editor . "'.replace('%file', factory.file).replace('%line', factory.line);
 									}
 								});
 							} catch (e) {}
