@@ -52,21 +52,34 @@ class ComponentLocator implements Tracy\IBarPanel
 					c0,5.1,3.9,9.6,9,9.8c0.3,0,0.6,0,0.8,0C21.6,28.8,26,23.9,26,18.1V18l0-3.9C26,13.1,25.3,12.2,24.3,12z"/>
 			</svg>' . " Find a component" .
 			"</span>" .
+
+			"<style>
+        	.js-component-locator-pointer {
+        		cursor: pointer;
+        	} 
+        	.backgroundColorImportant {
+        		background: lightgrey !important;
+        	}
+    	</style>" .
+
 			"<script>
 			$(function () {
 				var componentLocator = $('.js-tracy-component-locator');
-				componentLocator.parent().removeAttr('rel');
-		
+				var componentLocatorTab = componentLocator.parent();
+				
+				componentLocatorTab.removeAttr('rel');
+				componentLocatorTab.hover(showHover, hideHover)
+							
 				function capitalizeFirstLetter(string) {
 					return string.charAt(0).toUpperCase() + string.slice(1);
 				}
 				
 				const components = " . json_encode(self::$components) . ";
-
+				
 				const findElement = function(e) {
 					e.preventDefault();
 					e.stopPropagation();
-					
+
 					let found = false;
 					$(e.target).parents().each(function () { 
 						if (this.getAttribute('id')) {
@@ -83,33 +96,52 @@ class ComponentLocator implements Tracy\IBarPanel
 						}
 						
 						if (found) {
-							$('.js-tracy-component-locator').parent().css('background', 'limegreen');
+							componentLocatorTab.css('backgroundColor', 'limegreen');
+							makeLocatorTransparent();
 							return false;
 						}
 						else {
 							if (componentLocator[0] === e.target) {
-								componentLocator.parent().css('background', 'transparent');
+								componentLocatorTab.css('backgroundColor', 'transparent'); 
 							}
 							else {
-								componentLocator.parent().css('background', 'orange');
+								componentLocatorTab.css('backgroundColor', 'orange'); 
+								makeLocatorTransparent();
 							}
 						}
 					});
 					
 					$('*').each(function() {
 						this.removeEventListener('click', findElement, true);
+						componentLocator.removeClass('js-component-locator-pointer');
 					});
 				};
 		
 				componentLocator.on('click',function(event) {
 					$('*').each(function() {
 						this.addEventListener('click', findElement, true);
+						componentLocator.addClass('js-component-locator-pointer');
 					});
 					
-					$(this).parent().css('background', 'darkgrey');
+					// stop current running animation
+					componentLocatorTab.stop(true, true);
+					hideHover();
+					
+					componentLocatorTab.css('backgroundColor', 'darkgrey');
 				});
-		
-			});
+				
+				function showHover() {
+				    componentLocatorTab.addClass('backgroundColorImportant');
+				}
+				
+				function hideHover() {
+				    componentLocatorTab.removeClass('backgroundColorImportant');
+				}
+				
+				function makeLocatorTransparent() {
+					componentLocatorTab.animate({ backgroundColor: 'transparent' }, {duration: 3000});
+			   	}
+           });
 		</script>";
 	}
 
