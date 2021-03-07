@@ -113,14 +113,14 @@ class ComponentLocator implements Tracy\IBarPanel
 					
 					$('*').each(function() {
 						this.removeEventListener('click', findElement, true);
-						componentLocator.removeClass('js-component-locator-pointer');
+						$(this).removeClass('js-component-locator-pointer');
 					});
 				};
 		
 				componentLocator.on('click',function(event) {
 					$('*').each(function() {
 						this.addEventListener('click', findElement, true);
-						componentLocator.addClass('js-component-locator-pointer');
+						$(this).addClass('js-component-locator-pointer');
 					});
 					
 					// stop current running animation
