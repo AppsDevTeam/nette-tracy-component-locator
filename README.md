@@ -1,10 +1,10 @@
 # Nette Tracy Component Locator
 
-Install with the `composer require adt/nette-tracy-component-locator` command.
+Install with the `composer require --dev adt/nette-tracy-component-locator` command.
 
 Add `\ADT\ComponentLocator\ComponentLocator::initializePanel($this);` to your project, for example to `BasePresenter::afterRender` method.
 
-Be sure to have something like this in your neon:
+Be sure to have something like this in your local neon:
 
 ```
 tracy:
