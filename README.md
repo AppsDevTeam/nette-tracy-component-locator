@@ -11,6 +11,9 @@ tracy:
 	editor: "phpstorm://open?file=%file&line=%line"
 	editorMapping:
 		/var/www/html/: /your/real/path/to/project/
+
+	bar:
+		- \ADT\ComponentLocator\ComponentLocator
 ```
 
 On Ubuntu the editor path should be like this: `phpstorm://open?url=file://%file&line=%line`.
