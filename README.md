@@ -2,7 +2,14 @@
 
 Install with the `composer require --dev adt/nette-tracy-component-locator` command.
 
-Add `\ADT\ComponentLocator\ComponentLocator::initializePanel($this);` to your project, for example to `BasePresenter::afterRender` method.
+Add this to your project, for example to `BasePresenter::afterRender` method:
+
+```php
+
+if (class_exists('\ADT\ComponentLocator\ComponentLocator')) {
+	\ADT\ComponentLocator\ComponentLocator::initializePanel($this);
+}
+```
 
 Be sure to have something like this in your local neon:
 
