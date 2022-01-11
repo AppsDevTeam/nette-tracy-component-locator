@@ -16,6 +16,7 @@ Be sure to have something like this in your local neon:
 ```
 tracy:
 	editor: "phpstorm://open?file=%file&line=%line"
+	#editor: 'editor://%action/?file=%file&line=%line&search=%search&replace=%replace'
 	editorMapping:
 		/var/www/html/: /your/real/path/to/project/
 
