@@ -5,7 +5,6 @@ namespace ADT\ComponentLocator;
 use Nette\Application\UI\Presenter;
 use Nette\Utils\Strings;
 use Tracy;
-use Zend\Code\Reflection\ClassReflection;
 
 class ComponentLocator implements Tracy\IBarPanel
 {
@@ -13,7 +12,7 @@ class ComponentLocator implements Tracy\IBarPanel
 
 	public static function initializePanel(Presenter $presenter): void
 	{
-		foreach ((new ClassReflection(get_class($presenter)))->getMethods() as $methodReflection) {
+		foreach ((new \ReflectionClass(get_class($presenter)))->getMethods() as $methodReflection) {
 			if (Strings::startsWith($methodReflection->getName(), 'createComponent')) {
 				$reflection = new \ReflectionMethod($presenter, $methodReflection->getName());
 				$fileName = $reflection->getFileName();
